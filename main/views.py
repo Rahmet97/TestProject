@@ -7,8 +7,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from main.models import Users
-from main.serializers import UsersSerializer, UserSerializer
+from main.models import Users, New
+from main.serializers import UsersSerializer, UserSerializer, NewsSerializer
 
 
 class UsersList(generics.ListCreateAPIView):
@@ -89,6 +89,57 @@ def login(request):
         data = {
             "success": False,
             "message": "Xatolik!!!"
+        }
+        return Response(data, status=405)
+    return Response(data, status=200)
+
+
+@api_view(['get'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([])
+def news(request):
+    try:
+        user = request.user
+        new = New.objects.filter(author=user)
+        news_ser = NewsSerializer(new, many=True)
+        data = {
+            "success": True,
+            "data": news_ser.data
+        }
+    except Exception as e:
+        data = {
+            "success": False,
+            "message": "{}".format(e)
+        }
+        return Response(data, status=405)
+    return Response(data, status=200)
+
+
+@api_view(['post'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([])
+def add_news(request):
+    try:
+        title = request.data.get('title')
+        img = request.data.get('img')
+        desc = request.data.get('description')
+        if title is not None and img is not None and desc is not None:
+            new = New.objects.create(title=title, img=img, desc=desc, author=request.user)
+            new.save()
+            data = {
+                "success": True,
+                "message": "Muvaffaqiyatli yaratildi"
+            }
+        else:
+            data = {
+                "success": False,
+                "message": "Barcha ma'lumotlarni kiritish majburiy!!!"
+            }
+            return Response(data, status=405)
+    except Exception as e:
+        data = {
+            "success": False,
+            "message": "{}".format(e)
         }
         return Response(data, status=405)
     return Response(data, status=200)

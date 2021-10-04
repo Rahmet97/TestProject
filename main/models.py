@@ -1,4 +1,6 @@
 from os.path import splitext
+
+from django.contrib.auth.models import User
 from transliterate.utils import slugify
 
 from django.db import models
@@ -30,3 +32,19 @@ class Users(models.Model):
 
     def __str__(self):
         return self.phone
+
+
+class New(models.Model):
+    title = models.CharField(max_length=50)
+    img = models.ImageField(upload_to=slugify_upload)
+    desc = models.TextField()
+    created_time = models.DateTimeField(auto_now=True)
+    view = models.IntegerField(default=0)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'New'
+        verbose_name_plural = 'News'
+
+    def __str__(self):
+        return self.title
