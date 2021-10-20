@@ -143,3 +143,23 @@ def add_news(request):
         }
         return Response(data, status=405)
     return Response(data, status=200)
+
+
+@api_view(['get'])
+@authentication_classes([])
+@permission_classes([])
+def get_news(request):
+    try:
+        newss = New.objects.all()
+        news_data = NewsSerializer(newss, many=True)
+        data = {
+            "success": True,
+            "data": news_data.data
+        }
+    except Exception as e:
+        data = {
+            "success": False,
+            "message": "{}".format(e)
+        }
+        return Response(data, status=405)
+    return Response(data, status=200)
